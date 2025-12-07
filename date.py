@@ -12,7 +12,7 @@ year = now.year
 month = now.month
 
 def cleanDate() -> str:
-    now = datetime.now()
+    now = datetime.now(tz=ZoneInfo("America/New_York"))
     day = now.day
     formatted_date = now.strftime(f"%A, %B {day}{get_day_suffix(day)}")
     return formatted_date

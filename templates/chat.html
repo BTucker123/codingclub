@@ -23,6 +23,15 @@
         {% endfor %}
     </div>
 
+
+    <script>
+        const myName = "{{ session['name'] }}";  // get name from session
+
+        function highlightName(text) {
+            const regex = new RegExp(`(${myName})`, "gi"); // match name, case-insensitive
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+    </script>
     <script>
         const chatForm = document.getElementById("chat");
         const chatDiv = document.getElementById("di");
@@ -50,7 +59,7 @@
                         const newMessages = data.slice(lastIndex).reverse();
                         newMessages.forEach(item => {
                             const p = document.createElement("p");
-                            p.textContent = `${item.author} (${item.date}): ${item.content}`;
+                            p.innerHTML = highlightName(`${item.author} (${item.date}): ${item.content}`);
                             chatDiv.insertBefore(p, chatDiv.firstChild);
                         });
                         lastIndex = data.length;
