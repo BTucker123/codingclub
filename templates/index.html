@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club</title>
+</head>
+<body>
+    <h1>GACS Middle School Coding Club</h1>
+    <h3>Leader: {{leader}}</h3>
+    {% if session.name %}
+        <h3>You: {{session.name}}</h3>
+    {% endif %}
+    <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
+    {% if error %}
+        <p style="color: red">{{error}}</p>
+    {% endif %}
+
+    <div class="container">
+        <div class="box">
+            <h2><em>Roster</em></h2>
+
+            {% for name in roster[0] %}
+               <p>{{name}}</p>
+            {% endfor %}
+            <br>
+            {% for name in roster[1] %}
+               <p>{{name}}</p>
+            {% endfor %}
+            <br>
+            {% for name in roster[2] %}
+               <p>{{name}}</p>
+            {% endfor %}
+        </div>
+        <div class="box">
+            <h2><em>Bulletin Board</em></h2>
+            {% for item in bulliten %}
+                <div class="r">
+                    <h4>{{item["date"]}} - {{item["author"]}}</h4>
+                    <p>{{item["content"]}}</p>
+                </div>      
+            {% endfor %}
+        </div>
+    </div>
+    <div id="thatone">
+        <div class="box" style="margin-top: 30px;">
+            <h3>Last meet's topic: Data and Concat.</h3>
+            <h3>Next meet's topic: User Input</h3>
+            <h3>Topics Covered</h3>
+            <ol>
+                <li>print()</li>
+                <li>Basic Data Types</li>
+                <li>Concatenatation</li>
+                <li>Basic Type Conversion</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>

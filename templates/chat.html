@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club</title>
+</head>
+<body>
+    <h1>Coding Club Chatroom :)</h1>
+    <a href="{{url_for('homepage')}}">Home</a>
+    <div class="r">
+        <form action="/chat" method="POST">
+            <input type="hidden" name="type" value="newPost">
+            <textarea id="content" name="content" rows="2" cols="30" placeholder="Chat..."></textarea>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div class="r">
+        {% for post in posts|reverse %}
+            <p>{{post.author}} ({{post.date}}):  {{post.content}}</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

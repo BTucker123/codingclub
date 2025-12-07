@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club (Login)</title>
+</head>
+<body>
+    <h1>You need to be logged in :)</h1>
+    <h3>if i didn't tell you the secret key or you forgot (-_-)<br>then email me.</h3>
+    <br>
+    {% if error %}
+        <p style="color: red">{{error}}</p>
+    {% endif %}
+    <form action="/login" method="post">
+        <input type="text" name="username" placeholder="Your first name">
+        <input type="password" name="key" placeholder="the super secret key">
+        <input type="submit" value="login">
+    </form>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club</title>
+</head>
+<body>
+    <h1>Coding Club Help Forum</h1>
+    <p>Intended for help only. Casual conversations should be in the chatroom.</p>
+    <p>Also: close your post when it's solved.</p>
+    <a href="{{url_for('homepage')}}">Home</a>
+    <div class="r">
+        <form action="/forum" method="POST">
+            <input type="hidden" name="type" value="newPost">
+            <textarea id="content" name="content" rows="5" cols="50" placeholder="What's your question?"></textarea>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div class="r">
+        {% for post in posts|reverse %}
+            <div class="ra">
+                <h3>{{post.author}}</h3>
+                <h4>{{post.date}}</h4>
+                <p>{{post.content}}</p>
+                {% if post.author == session.name %}
+                    <form method="post" action="/forum">
+                        <input type="hidden" name="type" value="deletePost">
+                        <input type="submit" value="Close Post">
+                        <input type="hidden" name="id" value="{{post.id}}">
+                    </form>
+                {% endif %}
+                <form method="post" action="/forum">
+                <input type="hidden" name="type" value="replyToPost">
+                <input type="hidden" name="postID" value="{{post.id}}">
+                {% for reply in post.replies %}
+                    <p>{{reply.author}} - {{reply.date}}: {{reply.content}}</p>
+                {% endfor %}
+                <textarea id="c" name="c" rows="2" cols="30" placeholder="Reply to post..."></textarea>
+                <input type="submit" value="Reply">
+            </form>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

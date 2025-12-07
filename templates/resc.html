@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club - Rescources</title>
+</head>
+<body>
+    <h1>Coding Club Rescources</h1>
+
+    {% for res in resc %}
+       <a href="{{res.url}}" target="_blank" rel="noopener noreferrer">{{res.title}}</a>
+       <br>
+    {% endfor %}
+</body>
+</html>

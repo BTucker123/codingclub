@@ -1,0 +1,59 @@
+
+.container {
+    display: flex;      /* puts children side-by-side */
+    gap: 10px;  
+    border-radius: 15px;        /* optional spacing between them */
+}
+#thatone {
+    display: flex;
+    gap: 10px;
+    border-radius: 15px;
+    justify-content: center;
+}
+
+body {
+    text-align: center;
+    justify-content: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.c {
+    width: 400px;
+    height: 100px;
+}
+
+.r {
+    padding: 20px;
+    border-radius: 5px;
+    border: solid;
+    margin-top: 10px;
+    border-width: 2px;
+}
+.ra {
+    margin: 60px;
+    padding: 20px;
+    border-radius: 5px;
+    border: solid;
+    border-width: 2px;
+}
+
+.box {
+    padding: 20px;
+    border: solid;
+    border-radius: 30px;
+    border-width: 2px;
+    flex: 1;            /* makes them share space evenly */
+}
+.mini-break {
+  display: inline;
+  border: none;
+  height: 2px;
+  background: #888;
+  margin: 10px auto;
+  border-radius: 2px;
+}
+
+ol {
+    list-style-position: inside;
+    font-style: italic;
+}

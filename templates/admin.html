@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Club Admin Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <h3><a href="{{url_for('homepage')}}">Home</a></h3>
+    <form action="/admin" method="post">
+        <input type="hidden" name="type" value="addUser">
+        <input type="text" name="name" placeholder="Full name">
+        <input type="number" name="rank" placeholder="Rank (0 highest, 2 lowest)">
+        <input type="submit" value="Add Member">
+    </form>
+    {% for member in roster[0] %}
+        <p>{{member}}</p>
+        <form method="post" action="/admin">
+            <input type="hidden" name="type" value="deleteUser">
+            <input type="hidden" name="name" value="{{member}}">
+            <input type="hidden" name="rank" value="0">
+            <input type="submit" value="Delete Member">
+        </form>
+    {% endfor %}
+    {% for member in roster[1] %}
+        <p>{{member}}</p>
+        <form method="post" action="/admin">
+            <input type="hidden" name="type" value="deleteUser">
+            <input type="hidden" name="name" value="{{member}}">
+            <input type="hidden" name="rank" value="1">
+            <input type="submit" value="Delete Member">
+        </form>
+    {% endfor %}
+    {% for member in roster[2] %}
+        <p>{{member}}</p>
+        <form method="post" action="/admin">
+            <input type="hidden" name="type" value="deleteUser">
+            <input type="hidden" name="name" value="{{member}}">
+            <input type="hidden" name="rank" value="2">
+            <input type="submit" value="Delete Member">
+        </form>
+    {% endfor %}
+    <form method="post" action="/admin">
+        <input type="hidden" name="type" value="addResc">
+        <input type="text" name="url" placeholder="URL">
+        <input type="text" name="title" placeholder="Title of link">
+        <input type="submit" value="Add Rescource">
+    </form>
+</body>
+</html>
