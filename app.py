@@ -101,6 +101,17 @@ def admin():
             })
             save(rescou, "resc")
             return redirect(url_for("admin"))
+        if request.form.get('type') == "bulletinAdd":
+            content = request.form.get('content')
+            bullitenData = load("bulliten")
+            date = cleanDate() + " '" + str(year)[2:]
+            bullitenData.insert(0, {
+                "date":date,
+                "author": session.get("name"),
+                "content": content
+            })
+            save(bullitenData, "bulliten")
+            return redirect(url_for("admin"))
 
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
@@ -122,7 +133,7 @@ def forum():
             return redirect(url_for("forum"))
         if fType == "newPost":
             content = request.form.get('content')
-            date = cleanDate() + " '" + str(year)[:2]
+            date = cleanDate() + " '" + str(year)[2:]
             content = profanity.censor(content)
             postsData.append({
                 "author": name,

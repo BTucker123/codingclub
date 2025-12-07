@@ -8,6 +8,7 @@
 </head>
 <body>
     <h1>Coding Club Rescources</h1>
+    <h3><a href="{{url_for('homepage')}}">Home</a></h3>
 
     {% for res in resc %}
        <a href="{{res.url}}" target="_blank" rel="noopener noreferrer">{{res.title}}</a>
