@@ -1,1 +1,32 @@
-[]
+[
+    {
+        "author": "Beau Davidson",
+        "date": "12/6",
+        "content": "Welcome to the chatroom.",
+        "id": 0
+    },
+    {
+        "author": "Beau Davidson",
+        "date": "12/6",
+        "content": "test",
+        "id": 1
+    },
+    {
+        "author": "Beau Davidson",
+        "date": "12/7",
+        "content": "dude",
+        "id": 2
+    },
+    {
+        "author": "Beau Davidson",
+        "date": "12/7",
+        "content": "no way",
+        "id": 3
+    },
+    {
+        "author": "Beau Davidson",
+        "date": "12/6",
+        "content": "testing",
+        "id": 4
+    }
+]

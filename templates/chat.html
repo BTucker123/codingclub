@@ -4,22 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>Coding Club</title>
+    <title>Coding Club Chatroom</title>
 </head>
 <body>
     <h1>Coding Club Chatroom :)</h1>
-    <a href="{{url_for('homepage')}}">Home</a>
+    <a href="{{ url_for('homepage') }}">Home</a>
+
     <div class="r">
-        <form action="/chat" method="POST">
+        <form id="chat">
             <input type="hidden" name="type" value="newPost">
             <textarea id="content" name="content" rows="2" cols="30" placeholder="Chat..."></textarea>
-            <input type="submit" value="Submit">
         </form>
     </div>
-    <div class="r">
+
+    <div class="r" id="di">
         {% for post in posts|reverse %}
-            <p>{{post.author}} ({{post.date}}):  {{post.content}}</p>
+            <p>{{ post.author }} ({{ post.date }}): {{ post.content }}</p>
         {% endfor %}
     </div>
+
+    <script>
+        const chatForm = document.getElementById("chat");
+        const chatDiv = document.getElementById("di");
+        let lastIndex = {{ posts|length }};
+
+        chatForm.addEventListener("keydown", function(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                const formData = new FormData(chatForm);
+                fetch("/chat", {
+                    method: "POST",
+                    body: formData
+                }).then(() => {
+                    chatForm.reset();
+                    fetchNewMessages();
+                });
+            }
+        });
+
+        function fetchNewMessages() {
+            fetch("/getChatData")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > lastIndex) {
+                        const newMessages = data.slice(lastIndex).reverse();
+                        newMessages.forEach(item => {
+                            const p = document.createElement("p");
+                            p.textContent = `${item.author} (${item.date}): ${item.content}`;
+                            chatDiv.insertBefore(p, chatDiv.firstChild);
+                        });
+                        lastIndex = data.length;
+                    }
+                });
+        }
+
+        setInterval(fetchNewMessages, 5000);
+    </script>
 </body>
 </html>

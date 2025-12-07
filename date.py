@@ -1,11 +1,12 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 def get_day_suffix(day):
     if 11 <= day <= 13:
         return "th"
     return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-now = datetime.now()
+now = datetime.now(tz=ZoneInfo("America/New_York"))
 day = now.day
 year = now.year
 month = now.month

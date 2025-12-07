@@ -7,6 +7,7 @@ from date import cleanDate, year, day, month
 app.config["SESSION_PERMANENT"] = True
 
 
+
 def load(file):
    with open("./data/" + file + '.json', 'r') as f:
        return json.load(f)
@@ -14,6 +15,10 @@ def load(file):
 def save(data, file) -> None:
    with open("./data/" + file + '.json', 'w') as f:
        json.dump(data, f, indent=4)
+
+@app.route("/getChatData")
+def getChatData():
+    return load("chat")
 
 siteData = load("site")
 rosterData = load("roster")
@@ -96,7 +101,7 @@ def admin():
             })
             save(rescou, "resc")
             return redirect(url_for("admin"))
-        
+
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
     postsData = load("posts")
@@ -142,7 +147,7 @@ def forum():
             })
             save(d, "posts")
             return redirect(url_for("forum"))
-        
+
 @app.route("/chat", methods=['GET', 'POST'])
 def chat():
     postsData = load("chat")
@@ -167,12 +172,12 @@ def chat():
                 "id": len(postsData)  # append to end so id matches index
             })
             save(postsData, "chat")
-            return redirect(url_for("chat"))
+            return ""  # instead of redirect
 
 @app.route("/rescources")
 def rescources():
     res = load("resc")
-    return render_template("resc.html", resc=res) 
+    return render_template("resc.html", resc=res)
 
 
 

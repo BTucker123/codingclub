@@ -12,7 +12,7 @@
     {% if session.name %}
         <h3>You: {{session.name}}</h3>
     {% endif %}
-    <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
+    <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('rescources')}}">Rescources</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
     {% if error %}
         <p style="color: red">{{error}}</p>
     {% endif %}
@@ -39,7 +39,7 @@
                 <div class="r">
                     <h4>{{item["date"]}} - {{item["author"]}}</h4>
                     <p>{{item["content"]}}</p>
-                </div>      
+                </div>
             {% endfor %}
         </div>
     </div>
