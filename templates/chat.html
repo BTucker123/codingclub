@@ -26,9 +26,10 @@
 
     <script>
         const myName = "{{ session['name'] }}";  // get name from session
+        const firstName = "{{ session['name'].split(' ')[0] }}"
 
         function highlightName(text) {
-            const regex = new RegExp(`(${myName})`, "gi"); // match name, case-insensitive
+            const regex = new RegExp(`(${firstName})`, "gi"); // match name, case-insensitive
             return text.replace(regex, '<span class="highlight">$1</span>');
         }
     </script>

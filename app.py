@@ -112,6 +112,9 @@ def admin():
             })
             save(bullitenData, "bulliten")
             return redirect(url_for("admin"))
+        if request.form.get('type') == "clearChat":
+            save([], "chat")
+            return redirect(url_for("admin"))
 
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
@@ -186,7 +189,7 @@ def chat():
                 save(postsData, "chat")
                 return ""  # instead of redirect
 
-    return "It's not after school! You can't access this page."
+    return "It's not after school! You can't access this page during school hours (8am-3pm)."
 
 @app.route("/rescources")
 def rescources():

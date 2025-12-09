@@ -15,7 +15,8 @@
         <input type="number" name="rank" placeholder="Rank (0 highest, 2 lowest)">
         <input type="submit" value="Add Member">
     </form>
-    {% for member in roster[0] %}
+    <div class="r">
+        {% for member in roster[0] %}
         <p>{{member}}</p>
         <form method="post" action="/admin">
             <input type="hidden" name="type" value="deleteUser">
@@ -23,35 +24,43 @@
             <input type="hidden" name="rank" value="0">
             <input type="submit" value="Delete Member">
         </form>
-    {% endfor %}
-    {% for member in roster[1] %}
-        <p>{{member}}</p>
+        {% endfor %}
+        {% for member in roster[1] %}
+            <p>{{member}}</p>
+            <form method="post" action="/admin">
+                <input type="hidden" name="type" value="deleteUser">
+                <input type="hidden" name="name" value="{{member}}">
+                <input type="hidden" name="rank" value="1">
+                <input type="submit" value="Delete Member">
+            </form>
+        {% endfor %}
+        {% for member in roster[2] %}
+            <p>{{member}}</p>
+            <form method="post" action="/admin">
+                <input type="hidden" name="type" value="deleteUser">
+                <input type="hidden" name="name" value="{{member}}">
+                <input type="hidden" name="rank" value="2">
+                <input type="submit" value="Delete Member">
+            </form>
+        {% endfor %}
+    </div>
+    
+    <div class="r">
         <form method="post" action="/admin">
-            <input type="hidden" name="type" value="deleteUser">
-            <input type="hidden" name="name" value="{{member}}">
-            <input type="hidden" name="rank" value="1">
-            <input type="submit" value="Delete Member">
+            <input type="hidden" name="type" value="addResc">
+            <input type="text" name="url" placeholder="URL">
+            <input type="text" name="title" placeholder="Title of link">
+            <input type="submit" value="Add Rescource">
         </form>
-    {% endfor %}
-    {% for member in roster[2] %}
-        <p>{{member}}</p>
         <form method="post" action="/admin">
-            <input type="hidden" name="type" value="deleteUser">
-            <input type="hidden" name="name" value="{{member}}">
-            <input type="hidden" name="rank" value="2">
-            <input type="submit" value="Delete Member">
+            <input type="hidden" name="type" value="bulletinAdd">
+            <input type="text" name="content" placeholder="Content">
+            <input type="submit" value="Add Bulletin">
         </form>
-    {% endfor %}
-    <form method="post" action="/admin">
-        <input type="hidden" name="type" value="addResc">
-        <input type="text" name="url" placeholder="URL">
-        <input type="text" name="title" placeholder="Title of link">
-        <input type="submit" value="Add Rescource">
-    </form>
-    <form method="post" action="/admin">
-        <input type="hidden" name="type" value="bulletinAdd">
-        <input type="text" name="content" placeholder="Content">
-        <input type="submit" value="Add Bulletin">
-    </form>
+        <form method="post" action="/admin">
+            <input type="hidden" name="type" value="clearChat">
+            <input type="submit" value="Clear Chat">
+        </form>
+    </div>
 </body>
 </html>
