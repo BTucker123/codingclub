@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, request, redirect, session
 app = Flask(__name__)
 from better_profanity import profanity
 import json
-from date import cleanDate, year, day, month
+from date import cleanDate, year, day, month, is_after_school_hours as isAfterSchool
 
 app.config["SESSION_PERMANENT"] = True
 
@@ -161,29 +161,32 @@ def forum():
 
 @app.route("/chat", methods=['GET', 'POST'])
 def chat():
-    postsData = load("chat")
-    if request.method == "GET":
+    if isAfterSchool():
         postsData = load("chat")
-        if "name" not in session:
-            return redirect("/login")
-        return render_template("chat.html", posts=postsData)
-    if request.method == "POST":
-        fType = request.form.get('type')
-        name = session["name"]
-        content = request.form.get('content')
-        date = cleanDate()
-        if fType == "newPost":
+        if request.method == "GET":
+            postsData = load("chat")
+            if "name" not in session:
+                return redirect("/login")
+            return render_template("chat.html", posts=postsData)
+        if request.method == "POST":
+            fType = request.form.get('type')
+            name = session["name"]
             content = request.form.get('content')
             date = cleanDate()
-            content = profanity.censor(content)
-            postsData.append({
-                "author": name,
-                "date": str(month) + "/" + str(day),
-                "content": content,
-                "id": len(postsData)  # append to end so id matches index
-            })
-            save(postsData, "chat")
-            return ""  # instead of redirect
+            if fType == "newPost":
+                content = request.form.get('content')
+                date = cleanDate()
+                content = profanity.censor(content)
+                postsData.append({
+                    "author": name,
+                    "date": str(month) + "/" + str(day),
+                    "content": content,
+                    "id": len(postsData)  # append to end so id matches index
+                })
+                save(postsData, "chat")
+                return ""  # instead of redirect
+
+    return "It's not after school! You can't access this page."
 
 @app.route("/rescources")
 def rescources():

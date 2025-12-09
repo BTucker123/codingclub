@@ -11,6 +11,11 @@ day = now.day
 year = now.year
 month = now.month
 
+def is_after_school_hours() -> bool:
+    if now.hour > 8 and now.hour < 15:
+        return False
+    return True
+
 def cleanDate() -> str:
     now = datetime.now(tz=ZoneInfo("America/New_York"))
     day = now.day
