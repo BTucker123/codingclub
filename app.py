@@ -55,6 +55,8 @@ def login():
         if name in rosterData[0] or name in rosterData[1] or name in rosterData[2]:
             if key == app.secret_key:
                 session['name'] = name
+                session['admin'] = False
+                session['rank'] = 2 if name in rosterData[2] else 1
                 if name in rosterData[0]:
                     session['admin'] = True
                 return redirect(url_for("homepage", error="logged in!"))
@@ -74,6 +76,8 @@ def admin():
             return redirect(url_for("homepage", error="Unauthorized."))
         if session["admin"]:
             return render_template("admin.html", roster=rosterData)
+        if session["name"] in rosterData[1]:
+            return render_template("curator.html", roster=rosterData)
         return redirect(url_for("homepage", error="Unauthorized."))
     if request.method == "POST":
         if request.form.get('type') == "addUser":

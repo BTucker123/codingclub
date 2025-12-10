@@ -3,6 +3,7 @@
     display: flex;      /* puts children side-by-side */
     gap: 10px;  
     border-radius: 15px;        /* optional spacing between them */
+    transition: linear 1000s
 }
 #thatone {
     display: flex;
@@ -63,3 +64,15 @@ ol {
     padding: 2px 4px;
     border-radius: 2px;
 }
+
+a {
+    color: rgb(34, 34, 34);
+}
+
+div {
+    transition: ease 0.5s;
+}
+div:hover {
+    transform: scale(1.02);
+}
+

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Admin Panel</h1>
+    <h1>Curator Panel</h1>
     <h3><a href="{{url_for('homepage')}}">Home</a></h3>
     <form action="/admin" method="post">
         <input type="hidden" name="type" value="addUser">
@@ -15,36 +15,6 @@
         <input type="number" name="rank" placeholder="Rank (0 highest, 2 lowest)">
         <input type="submit" value="Add Member">
     </form>
-    <div class="r">
-        {% for member in roster[0] %}
-        <p>{{member}}</p>
-        <form method="post" action="/admin">
-            <input type="hidden" name="type" value="deleteUser">
-            <input type="hidden" name="name" value="{{member}}">
-            <input type="hidden" name="rank" value="0">
-            <input type="submit" value="Delete Member">
-        </form>
-        {% endfor %}
-        {% for member in roster[1] %}
-            <p>{{member}}</p>
-            <form method="post" action="/admin">
-                <input type="hidden" name="type" value="deleteUser">
-                <input type="hidden" name="name" value="{{member}}">
-                <input type="hidden" name="rank" value="1">
-                <input type="submit" value="Delete Member">
-            </form>
-        {% endfor %}
-        {% for member in roster[2] %}
-            <p>{{member}}</p>
-            <form method="post" action="/admin">
-                <input type="hidden" name="type" value="deleteUser">
-                <input type="hidden" name="name" value="{{member}}">
-                <input type="hidden" name="rank" value="2">
-                <input type="submit" value="Delete Member">
-            </form>
-        {% endfor %}
-    </div>
-    
     <div class="r">
         <form method="post" action="/admin">
             <input type="hidden" name="type" value="addResc">
