@@ -124,7 +124,7 @@ def curator():
     siteData = load("site")
     rosterData = load("roster")
     bullitenData = load("bulliten")
-    postsData: list = load('posts')
+    postsData: list = load('posts') # this is a comment
     if request.method == "GET":
         if "name" not in session:
             return redirect(url_for("homepage", error="Unauthorized."))
