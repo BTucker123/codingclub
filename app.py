@@ -1,10 +1,12 @@
 from flask import Flask, render_template, url_for, request, redirect, session
 app = Flask(__name__)
+
 from better_profanity import profanity
 import json
 from date import cleanDate, year, day, month, is_after_school_hours as isAfterSchool
 import requests
 app.config["SESSION_PERMANENT"] = True
+
 
 
 
@@ -59,6 +61,7 @@ def page(name):
     
 
 
+
 @app.route("/")
 def homepage():
     error = request.args.get("err")
@@ -66,7 +69,17 @@ def homepage():
     rosterData = load("roster")
     bullitenData = load("bulliten")
     error = request.args.get("error")
-    return render_template("index.html", error=error, roster=rosterData, bulliten=bullitenData, leader=siteData['leader'])
+    return render_template(
+    "index.html",
+    error=error,
+    roster=rosterData,
+    bulliten=bullitenData,
+    is_admin=session.get('admin', False),
+    rank=session.get('rank'),
+    leader=siteData.get('leader'),
+    logged_in=("name" in session)   # 👈 add this
+)
+
 
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -149,8 +162,11 @@ def admin():
             save(bullitenData, "bulliten")
             return redirect(url_for("admin"))
         if request.form.get('type') == "clearChat":
-            save([], "chat")
+            save([], "chat") #hi
             return redirect(url_for("admin"))
+        if not session.get('is_admin'):
+            return "Access denied", 403
+
 @app.route("/curator", methods=["GET", "POST"])
 def curator():
     siteData = load("site")
@@ -181,7 +197,7 @@ def curator():
             del d[int(rank)][i]
             save(d, 'roster')
             return redirect(url_for("curator"))
-        if request.form.get('type') == "addResc":
+        if request.form.get('type') == "addResc": #h
             url = request.form.get('url')
             title = request.form.get('title')
             rescou:list = load("resc")
