@@ -12,16 +12,43 @@
     {% if session.name %}
         <h3>You: {{session.name}}</h3>
     {% endif %}
-    <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('rescources')}}">Rescources</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
-    {% if session.rank= 0 %}
-        <p><a href="{{url_for('admin')}}">Admin Panel</a></p>
-    {% endif %}
-    {% if session.rank= 1 %}
-        <p><a href="{{url_for('curator')}}">curator Panel</a></p>
-    {% endif %}
+   
+<p>
+    {% if logged_in %}
+        <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
+            <button class="btn btn-secondary">Log Out</button>
+        </form>
+
     {% if error %}
         <p style="color: red">{{error}}</p>
     {% endif %}
+</p>
+<nav>
+    <a href="{{ url_for('homepage') }}">Home Page</a>
+    <a href="{{ url_for('forum') }}">Help Forum</a>
+    <a href="{{ url_for('chat') }}">Chatroom</a>
+
+
+    {% else %}
+        <a href="{{ url_for('login') }}">
+            <button class="btn btn-primary">Log In</button>
+        </a>
+    {% endif %}
+
+    {% if is_admin %}
+        <a href="{{ url_for('admin') }}">
+            <button class="btn btn-danger">Admin Panel</button>
+        </a>
+    {% endif %}
+
+    {% if is_admin or rank == 1 %}
+        <a href="{{ url_for('curator') }}">
+            <button class="btn btn-warning">Curator Panel</button>
+        </a>
+    {% endif %}
+</nav>
+
+
 
     <div class="container">
         <div class="box">
