@@ -6,7 +6,7 @@ def get_day_suffix(day):
         return "th"
     return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
 
-now = datetime.now()
+now = datetime.now(tz=ZoneInfo("America/New_York"))
 day = now.day
 year = now.year
 month = now.month
@@ -17,7 +17,7 @@ def is_after_school_hours() -> bool:
     return True
 
 def cleanDate() -> str:
-    now = datetime.now()
+    now = datetime.now(tz=ZoneInfo("America/New_York"))
     day = now.day
     formatted_date = now.strftime(f"%A, %B {day}{get_day_suffix(day)}")
     return formatted_date

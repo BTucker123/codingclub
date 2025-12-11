@@ -1,7 +1,6 @@
 
 .container {
     display: flex;      /* puts children side-by-side */
-    justify-content: center;
     gap: 10px;  
     border-radius: 15px;        /* optional spacing between them */
     transition: linear 1000s
@@ -30,20 +29,6 @@ body {
     border: solid;
     margin-top: 10px;
     border-width: 2px;
-}
-.vstack {
-  display: flex;
-  flex-direction: column; /* stack items vertically */
-  gap: 10px; /* space between items */
-}
-.ghRepo {
-    padding: 20px;
-    border-radius: 5px;
-    border: solid;
-    max-width: 250px;
-    margin-top: 10px;
-    border-width: 2px;
-    flex: 1;
 }
 .ra {
     margin: 60px;
