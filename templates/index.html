@@ -13,6 +13,9 @@
         <h3>You: {{session.name}}</h3>
     {% endif %}
     <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('rescources')}}">Rescources</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
+    {% if session.rank %}
+        <p><a href="{{url_for('admin')}}">Admin Panel</a></p>
+    {% endif %}
     {% if error %}
         <p style="color: red">{{error}}</p>
     {% endif %}
