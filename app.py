@@ -3,7 +3,7 @@ app = Flask(__name__)
 from better_profanity import profanity
 import json
 from date import cleanDate, year, day, month, is_after_school_hours as isAfterSchool
-
+import requests
 app.config["SESSION_PERMANENT"] = True
 
 
@@ -20,16 +20,48 @@ def save(data, file) -> None:
 def getChatData():
     return load("chat")
 
+app.secret_key = 'catbean'
 siteData = load("site")
 rosterData = load("roster")
 bullitenData = load("bulliten")
 postsData: list = load('posts')
 
-app.secret_key = 'catbean'
+def getGithubRepos(username):
+    url = f"https://api.github.com/users/{username}/repos"
+    response = requests.get(url)
+    repos = response.json()
+    return repos
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    error = request.args.get("error")
+    if request.method == "GET":
+        if session.get('name'):
+            return render_template("settings.html", error=error)
+        return render_template("login.html")
+    if request.method == "POST":
+        fType = request.form.get('type')
+        if fType == "addGithub":
+            username = request.form.get("username")
+            rosterGH = load("rosterGithub")
+            rosterGH[session["name"]] = username
+            save(rosterGH, "rosterGithub")
+            return redirect(url_for("settings", error="Updated Github Username."))
+        return "Beau messed up the coding, what an idiot."
+
+@app.route("/page/<name>")
+def page(name):
+    ghr = load("rosterGithub")
+
+    if name in ghr.keys():
+        return render_template("page.html", yes=True, name=ghr[name], repos=getGithubRepos(name))
+    return render_template("page.html", yes=False, name=name, repos=getGithubRepos(name))
+    
 
 
 @app.route("/")
 def homepage():
+    error = request.args.get("err")
     siteData = load("site")
     rosterData = load("roster")
     bullitenData = load("bulliten")
