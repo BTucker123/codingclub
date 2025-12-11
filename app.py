@@ -149,7 +149,7 @@ def curator():
             del d[int(rank)][i]
             save(d, 'roster')
             return redirect(url_for("curator"))
-        if request.form.get('type') == "addResc":
+        if request.form.get('type') == "addResc": #h
             url = request.form.get('url')
             title = request.form.get('title')
             rescou:list = load("resc")
