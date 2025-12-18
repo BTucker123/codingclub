@@ -18,6 +18,11 @@
         <form action="{{ url_for('logout') }}" method="post" style="display:inline;">
             <button class="btn btn-secondary">Log Out</button>
         </form>
+    {% else %}
+        <a href="{{ url_for('login') }}">
+            <button class="btn btn-primary">Log In</button>
+        </a>
+    {% endif %}
 
     {% if error %}
         <p style="color: red">{{error}}</p>
@@ -29,10 +34,7 @@
     <a href="{{ url_for('chat') }}">Chatroom</a>
 
 
-    {% else %}
-        <a href="{{ url_for('login') }}">
-            <button class="btn btn-primary">Log In</button>
-        </a>
+
     {% endif %}
 
     {% if is_admin %}
