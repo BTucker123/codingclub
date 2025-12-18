@@ -1,12 +1,10 @@
 from flask import Flask, render_template, url_for, request, redirect, session
 app = Flask(__name__)
-
 from better_profanity import profanity
 import json
 from date import cleanDate, year, day, month, is_after_school_hours as isAfterSchool
 
 app.config["SESSION_PERMANENT"] = True
-
 
 
 
@@ -30,24 +28,13 @@ postsData: list = load('posts')
 app.secret_key = 'catbean'
 
 
-
 @app.route("/")
 def homepage():
     siteData = load("site")
     rosterData = load("roster")
     bullitenData = load("bulliten")
     error = request.args.get("error")
-    return render_template(
-    "index.html",
-    error=error,
-    roster=rosterData,
-    bulliten=bullitenData,
-    is_admin=session.get('admin', False),
-    rank=session.get('rank'),
-    leader=siteData.get('leader'),
-    logged_in=("name" in session)   # 👈 add this
-)
-
+    return render_template("index.html", error=error, roster=rosterData, bulliten=bullitenData, leader=siteData['leader'])
 
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -130,65 +117,8 @@ def admin():
             save(bullitenData, "bulliten")
             return redirect(url_for("admin"))
         if request.form.get('type') == "clearChat":
-            save([], "chat") #hi
-            return redirect(url_for("admin"))
-        if not session.get('is_admin'):
-            return "Access denied", 403
-
-@app.route("/curator", methods=["GET", "POST"])
-def curator():
-    siteData = load("site")
-    rosterData = load("roster")
-    bullitenData = load("bulliten")
-    postsData: list = load('posts') # this is a comment
-    if request.method == "GET":
-        if "name" not in session:
-            return redirect(url_for("homepage", error="Unauthorized."))
-        if session["admin"]:
-            return render_template("curator.html", roster=rosterData)
-        if session["name"] in rosterData[1]:
-            return render_template("curator.html", roster=rosterData)
-        return redirect(url_for("homepage", error="Unauthorized."))
-    if request.method == "POST":
-        if request.form.get('type') == "addUser":
-            name = request.form.get('name')
-            rank = request.form.get('rank')
-            d = load('roster')
-            d[int(rank)].append(name)
-            save(d, 'roster')
-            return redirect(url_for("curator"))
-        if request.form.get('type') == "deleteUser":
-            name = request.form.get('name')
-            rank = request.form.get('rank')
-            d:list = load('roster')
-            i = d[int(rank)].index(name)
-            del d[int(rank)][i]
-            save(d, 'roster')
-            return redirect(url_for("curator"))
-        if request.form.get('type') == "addResc": #h
-            url = request.form.get('url')
-            title = request.form.get('title')
-            rescou:list = load("resc")
-            rescou.append({
-                "url": url,
-                "title": title
-            })
-            save(rescou, "resc")
-            return redirect(url_for("curator"))
-        if request.form.get('type') == "bulletinAdd":
-            content = request.form.get('content')
-            bullitenData = load("bulliten")
-            date = cleanDate() + " '" + str(year)[2:]
-            bullitenData.insert(0, {
-                "date":date,
-                "author": session.get("name"),
-                "content": content
-            })
-            save(bullitenData, "bulliten")
-            return redirect(url_for("curator"))
-        if request.form.get('type') == "clearChat":
             save([], "chat")
-            return redirect(url_for("curator"))
+            return redirect(url_for("admin"))
 
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
