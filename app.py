@@ -34,7 +34,7 @@ def homepage():
     rosterData = load("roster")
     bullitenData = load("bulliten")
     error = request.args.get("error")
-    return render_template("index.html", error=error, roster=rosterData, bulliten=bullitenData, leader=siteData['leader'])
+    return render_template("index.html", session=session, error=error, roster=rosterData, bulliten=bullitenData, leader=siteData['leader'], rank=session.get("rank"), admin=session.get("admin"))
 
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -232,7 +232,7 @@ def chat():
         if request.method == "POST":
             fType = request.form.get('type')
             name = session["name"]
-            content = request.form.get('content')
+            content = request.form.get('content') #HI
             date = cleanDate()
             if fType == "newPost":
                 content = request.form.get('content')
@@ -258,4 +258,5 @@ def rescources():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host="0.0.0.0")
+
 
