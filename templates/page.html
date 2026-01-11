@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{name}}'s Page (Coding Club)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>{{name}}'s Coding Club Page</h1>
+    {% if yes %}
+        <h3>Github Repositories</h3>
+        <div class="vstack">
+            <div class="container">
+                {% for repo in repos[0:3] %}
+                    <div class="ghRepo" onclick="window.location = '{{repo.html_url}}'">
+                            <h2>{{repo.name}}</h2>
+                            <h3>{{repo.description}}</h3>
+                    </div>
+                    {% endfor %}
+            </div>
+            <div class="container">
+                {% for repo in repos[3:6] %}
+                    <div class="ghRepo" onclick="window.location = '{{repo.html_url}}'">
+                            <h2>{{repo.name}}</h2>
+                            <h3>{{repo.description}}</h3>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="container">
+                {% for repo in repos[6:9] %}
+                    <div class="ghRepo" onclick="window.location = '{{repo.html_url}}'">
+                            <h2>{{repo.name}}</h2>
+                            <h3>{{repo.description}}</h3>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</body>
+</html>

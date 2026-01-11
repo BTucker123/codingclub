@@ -119,7 +119,8 @@ def admin():
         if request.form.get('type') == "clearChat":
             save([], "chat")
             return redirect(url_for("admin"))
-@app.route("/curator", methods=["GET", "POST"])
+        
+@app.route("/curator" ,methods=["GET", "POST"])
 def curator():
     siteData = load("site")
     rosterData = load("roster")
@@ -128,10 +129,11 @@ def curator():
     if request.method == "GET":
         if "name" not in session:
             return redirect(url_for("homepage", error="Unauthorized."))
-        if session["admin"]:
-            return render_template("curator.html", roster=rosterData)
+        if session.get("rank") == 1:
+
+            return render_template("curator.html",roster=rosterData)
         if session["name"] in rosterData[1]:
-            return render_template("curator.html", roster=rosterData)
+            return render_template("admin.html", roster=rosterData)
         return redirect(url_for("homepage", error="Unauthorized."))
     if request.method == "POST":
         if request.form.get('type') == "addUser":
@@ -173,6 +175,7 @@ def curator():
         if request.form.get('type') == "clearChat":
             save([], "chat")
             return redirect(url_for("curator"))
+        
 
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
