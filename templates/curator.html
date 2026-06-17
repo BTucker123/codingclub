@@ -3,35 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Club Admin Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club - Curator Panel</title>
+    <style>
+        .admin-box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #fafafa; }
+        .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
+        .user-row input, .user-row select { padding: 4px; }
+        .status-badge { font-size: 11px; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    </style>
 </head>
 <body>
-    <h1>Curator Panel</h1>
-    <h3><a href="{{url_for('homepage')}}">Home</a></h3>
-    <form action="/admin" method="post">
-        <input type="hidden" name="type" value="addUser">
-        <input type="text" name="name" placeholder="Full name">
-        <input type="number" name="rank" placeholder="Rank (0 highest, 2 lowest)">
-        <input type="submit" value="Add Member">
-    </form>
-    <div class="r">
-        <form method="post" action="/admin">
-            <input type="hidden" name="type" value="addResc">
-            <input type="text" name="url" placeholder="URL">
-            <input type="text" name="title" placeholder="Title of link">
-            <input type="submit" value="Add Rescource">
+    <h1>Curator Dashboard</h1>
+    <h3><a href="{{ url_for('homepage') }}">Back to Home</a></h3>
+
+    <!-- 1. Master Member Viewer and Quick Removal Panel -->
+    <div class="admin-box">
+        <h2>Club Roster Operations</h2>
+        <p style="font-size: 13px; color: #666;">View current club roster accounts or request standard membership cancellations [1].</p>
+        
+        {% for username, info in roster.items() %}
+            <div class="user-row">
+                <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <label><strong>User Profile:</strong></label>
+                    <span style="font-size: 16px;">{{ username }}</span>
+                    &nbsp;&nbsp;&nbsp;
+                    
+                    <label><strong>Tier:</strong></label>
+                    <span style="font-weight: bold; color: #555;">
+                        {% if info.rank == 0 %}Admin{% elif info.rank == 1 %}Curator{% else %}Student Member{% endif %}
+                    </span>
+
+                    <!-- Active System State Indicators (ReadOnly for Curators) -->
+                    {% if info.is_muted %}
+                        <span class="status-badge" style="background-color: #e67e22;">MUTED</span>
+                    {% endif %}
+                    {% if info.is_suspended %}
+                        <span class="status-badge" style="background-color: #7f8c8d;">SUSPENDED</span>
+                    {% endif %}
+                </div>
+
+                <!-- Curator-permitted quick delete hook -->
+                <form method="POST" action="{{ url_for('curator') }}" style="display: inline;">
+                    <input type="hidden" name="type" value="deleteUser">
+                    <input type="hidden" name="name" value="{{ username }}">
+                    <button type="submit" onclick="return confirm('Delete {{ username }} from the system registry?');" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Remove</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- 2. Member Enrollment Module -->
+    <div class="admin-box">
+        <h2>Enroll New Member</h2>
+        <form method="POST" action="{{ url_for('curator') }}">
+            <input type="hidden" name="type" value="addUser">
+            <input type="text" name="name" placeholder="First and Last Name" required style="padding: 6px; width: 250px; border-radius: 4px; border: 1px solid #ccc;">
+            &nbsp;
+            <label>Privilege Assignment:</label>
+            <select name="rank" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
+                <option value="2" selected>Student</option>
+                <option value="1">Curator</option>
+                <option value="0">Admin</option>
+            </select>
+            &nbsp;
+            <button type="submit" style="padding: 6px 15px; border-radius: 4px; border: none; background: #28a745; color: white; cursor: pointer; font-weight: bold;">Register User</button>
         </form>
-        <hr>
-        <form method="post" action="/admin">
+    </div>
+
+    <!-- 3. Bulletin Content Creator -->
+    <div class="admin-box">
+        <h2>Post to Bulletin Board</h2>
+        <form method="POST" action="{{ url_for('curator') }}">
             <input type="hidden" name="type" value="bulletinAdd">
-            <input type="text" name="content" placeholder="Content">
-            <input type="submit" value="Add Bulletin">
+            <div class="form-group">
+                <label>Announcement Content:</label>
+                <textarea name="content" rows="3" placeholder="Type upcoming milestones, schedules, or coding prompts..." required style="font-family: inherit;"></textarea>
+            </div>
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Post Announcement</button>
         </form>
-        <hr>
-        <form method="post" action="/admin">
+    </div>
+
+    <!-- 4. Resources Directory Directory Submit form -->
+    <div class="admin-box">
+        <h2>Add Web Resource Link</h2>
+        <form method="POST" action="{{ url_for('curator') }}">
+            <input type="hidden" name="type" value="addResc">
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>Resource Title:</label>
+                    <input type="text" name="title" placeholder="e.g., Codecademy Learning Hub" required>
+                </div>
+                <div style="flex: 2;">
+                    <label>Reference URL Path:</label>
+                    <input type="url" name="url" placeholder="https://example.com" required>
+                </div>
+            </div>
+            <button type="submit" style="background-color: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">Add Link</button>
+        </form>
+    </div>
+
+    <!-- 5. Curator-Safe Utility Controls -->
+    <div class="admin-box">
+        <h2>Channel Utilities</h2>
+        <form method="POST" action="{{ url_for('curator') }}" style="display: inline;">
             <input type="hidden" name="type" value="clearChat">
-            <input type="submit" value="Clear Chat">
+            <button type="submit" onclick="return confirm('Completely flush all histories from the live chat logging engine?');" style="background-color: #ffc107; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: black;">Clear Live Chatroom Logs</button>
         </form>
     </div>
 </body>

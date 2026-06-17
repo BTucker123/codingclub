@@ -9,6 +9,10 @@
         .admin-box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #fafafa; }
         .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
         .user-row input, .user-row select { padding: 4px; }
+        .status-badge { font-size: 11px; padding: 2px 6px; border-radius: 3px; font-weight: bold; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-radius; }
     </style>
 </head>
 <body>
@@ -18,16 +22,13 @@
     <!-- 1. Master Member Editor Grid -->
     <div class="admin-box">
         <h2>Manage & Edit Members</h2>
-        <p style="font-size: 13px; color: #666;">View passwords, change usernames, or reassign club privileges instantly.</p>
-        
         {% for username, info in roster.items() %}
             <div class="user-row">
-                <!-- Inline modification submission form for each user profile -->
                 <form method="POST" action="{{ url_for('admin') }}" style="display: flex; align-items: center; gap: 10px; width: 100%;">
                     <input type="hidden" name="type" value="editUser">
                     <input type="hidden" name="old_name" value="{{ username }}">
                     
-                    <label>Username:</label>
+                    <label>User:</label>
                     <input type="text" name="new_name" value="{{ username }}" required>
                     
                     <label>Password:</label>
@@ -39,15 +40,22 @@
                         <option value="1" {% if info.rank == 1 %}selected{% endif %}>Curator</option>
                         <option value="2" {% if info.rank == 2 %}selected{% endif %}>Student</option>
                     </select>
+
+                    <!-- Active System State Indicators -->
+                    {% if info.is_muted %}
+                        <span class="status-badge" style="background-color: #e67e22;">MUTED</span>
+                    {% endif %}
+                    {% if info.is_suspended %}
+                        <span class="status-badge" style="background-color: #7f8c8d;">SUSPENDED</span>
+                    {% endif %}
                     
                     <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Save</button>
                 </form>
 
-                <!-- Dedicated delete action button hook -->
                 <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
                     <input type="hidden" name="type" value="deleteUser">
                     <input type="hidden" name="name" value="{{ username }}">
-                    <button type="submit" onclick="return confirm('Delete {{ username }} completely?');" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Delete</button>
+                    <button type="submit" onclick="return confirm('Delete {{ username }}?');" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Delete</button>
                 </form>
             </div>
         {% endfor %}
@@ -68,12 +76,71 @@
         </form>
     </div>
 
-    <!-- 3. System Utilities Section -->
+    <!-- NEW SECTION: Add Bulletin Board Posts -->
     <div class="admin-box">
-        <h2>Global Commands</h2>
+        <h2>Post to Bulletin Board</h2>
+        <form method="POST" action="{{ url_for('admin') }}">
+            <input type="hidden" name="type" value="bulletinAdd">
+            <div class="form-group">
+                <label>Announcement Content:</label>
+                <textarea name="content" rows="3" placeholder="Type club updates or announcements here..." required style="width: 100%; border-radius: 4px; padding: 8px; border: 1px solid #ccc; font-family: inherit;"></textarea>
+            </div>
+            <button type="submit" style="background-color: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Post Announcement</button>
+        </form>
+    </div>
+
+    <!-- NEW SECTION: Add Links to Resources Directory -->
+    <div class="admin-box">
+        <h2>Add Web Resource Link</h2>
+        <form method="POST" action="{{ url_for('admin') }}">
+            <input type="hidden" name="type" value="addResc">
+            <div class="form-group" style="display: flex; gap: 15px;">
+                <div style="flex: 1;">
+                    <label>Resource Title:</label>
+                    <input type="text" name="title" placeholder="e.g., W3Schools Python Tutorial" required>
+                </div>
+                <div style="flex: 2;">
+                    <label>Resource URL:</label>
+                    <input type="url" name="url" placeholder="https://example.com" required>
+                </div>
+            </div>
+            <button type="submit" style="background-color: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Add Link</button>
+        </form>
+    </div>
+
+    <!-- 5. Global Moderation & Commands Section -->
+    <div class="admin-box">
+        <h2>Global Commands & Moderation</h2>
+        
+        <form method="POST" action="{{ url_for('admin') }}" style="background: white; padding: 15px; border: 1px solid #eee; border-radius: 4px; margin-bottom: 15px;">
+            <input type="hidden" name="type" value="modAction">
+            <h3>Club Enforcement Tools</h3>
+            
+            <label>Select Target User:</label>
+            <select name="target_user" required>
+                <option value="" disabled selected>-- Choose a Member --</option>
+                {% for username in roster.keys() %}
+                    <option value="{{ username }}">{{ username }}</option>
+                {% endfor %}
+            </select>
+            &nbsp;&nbsp;&nbsp;
+            
+            <label>Select Action:</label>
+            <select name="action" required>
+                <option value="mute">Mute (Block Chat & Forum)</option>
+                <option value="unmute">Unmute</option>
+                <option value="suspend">Suspend Account (Block Login)</option>
+                <option value="unsuspend">Remove Suspension</option>
+                <option value="ban">Ban User (Completely Delete Profile)</option>
+            </select>
+            &nbsp;&nbsp;&nbsp;
+
+            <button type="submit" onclick="return confirm('Execute moderation command on this user?');" style="background-color: #e74c3c; color: white; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;">Execute Action</button>
+        </form>
+
         <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
             <input type="hidden" name="type" value="clearChat">
-            <button type="submit" onclick="return confirm('Permanently clear all chat histories?');" style="background-color: #ffc107; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Clear Live Chatroom Logs</button>
+            <button type="submit" onclick="return confirm('Permanently clear all chat histories?');" style="background-color: #ffc107; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Clear Live Chatroom Logs</button>
         </form>
     </div>
 </body>
