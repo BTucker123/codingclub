@@ -3,65 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coding Club Admin Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Coding Club - Admin Panel</title>
+    <style>
+        .admin-box { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; background: #fafafa; }
+        .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; background: #fff; padding: 8px; border: 1px solid #eee; border-radius: 4px; }
+        .user-row input, .user-row select { padding: 4px; }
+    </style>
 </head>
 <body>
-    <h1>Admin Panel</h1>
-    <h3><a href="{{url_for('homepage')}}">Home</a></h3>
-    <form action="/admin" method="post">
-        <input type="hidden" name="type" value="addUser">
-        <input type="text" name="name" placeholder="Full name">
-        <input type="number" name="rank" placeholder="Rank (0 highest, 2 lowest)">
-        <input type="submit" value="Add Member">
-    </form>
-    <div class="r">
-        {% for member in roster[0] %}
-        <p>{{member}}</p>
-        <form method="post" action="/admin">
-            <input type="hidden" name="type" value="deleteUser">
-            <input type="hidden" name="name" value="{{member}}">
-            <input type="hidden" name="rank" value="0">
-            <input type="submit" value="Delete Member">
-        </form>
-        {% endfor %}
-        {% for member in roster[1] %}
-            <p>{{member}}</p>
-            <form method="post" action="/admin">
-                <input type="hidden" name="type" value="deleteUser">
-                <input type="hidden" name="name" value="{{member}}">
-                <input type="hidden" name="rank" value="1">
-                <input type="submit" value="Delete Member">
-            </form>
-        {% endfor %}
-        {% for member in roster[2] %}
-            <p>{{member}}</p>
-            <form method="post" action="/admin">
-                <input type="hidden" name="type" value="deleteUser">
-                <input type="hidden" name="name" value="{{member}}">
-                <input type="hidden" name="rank" value="2">
-                <input type="submit" value="Delete Member">
-            </form>
+    <h1>Master Admin Panel</h1>
+    <h3><a href="{{ url_for('homepage') }}">Back to Home</a></h3>
+
+    <!-- 1. Master Member Editor Grid -->
+    <div class="admin-box">
+        <h2>Manage & Edit Members</h2>
+        <p style="font-size: 13px; color: #666;">View passwords, change usernames, or reassign club privileges instantly.</p>
+        
+        {% for username, info in roster.items() %}
+            <div class="user-row">
+                <!-- Inline modification submission form for each user profile -->
+                <form method="POST" action="{{ url_for('admin') }}" style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                    <input type="hidden" name="type" value="editUser">
+                    <input type="hidden" name="old_name" value="{{ username }}">
+                    
+                    <label>Username:</label>
+                    <input type="text" name="new_name" value="{{ username }}" required>
+                    
+                    <label>Password:</label>
+                    <input type="text" name="password" value="{{ info.password }}" required>
+                    
+                    <label>Rank:</label>
+                    <select name="rank">
+                        <option value="0" {% if info.rank == 0 %}selected{% endif %}>Admin</option>
+                        <option value="1" {% if info.rank == 1 %}selected{% endif %}>Curator</option>
+                        <option value="2" {% if info.rank == 2 %}selected{% endif %}>Student</option>
+                    </select>
+                    
+                    <button type="submit" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Save</button>
+                </form>
+
+                <!-- Dedicated delete action button hook -->
+                <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
+                    <input type="hidden" name="type" value="deleteUser">
+                    <input type="hidden" name="name" value="{{ username }}">
+                    <button type="submit" onclick="return confirm('Delete {{ username }} completely?');" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Delete</button>
+                </form>
+            </div>
         {% endfor %}
     </div>
-    
-    <div class="r">
-        <form method="post" action="/admin">
-            <input type="hidden" name="type" value="addResc">
-            <input type="text" name="url" placeholder="URL">
-            <input type="text" name="title" placeholder="Title of link">
-            <input type="submit" value="Add Rescource">
+
+    <!-- 2. Quick Account Registration Panel -->
+    <div class="admin-box">
+        <h2>Add New Member</h2>
+        <form method="POST" action="{{ url_for('admin') }}">
+            <input type="hidden" name="type" value="addUser">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <select name="rank">
+                <option value="2">Student</option>
+                <option value="1">Curator</option>
+                <option value="0">Admin</option>
+            </select>
+            <button type="submit">Create User</button>
         </form>
-        <hr>
-        <form method="post" action="/admin">
-            <input type="hidden" name="type" value="bulletinAdd">
-            <input type="text" name="content" placeholder="Content">
-            <input type="submit" value="Add Bulletin">
-        </form>
-        <hr>
-        <form method="post" action="/admin">
+    </div>
+
+    <!-- 3. System Utilities Section -->
+    <div class="admin-box">
+        <h2>Global Commands</h2>
+        <form method="POST" action="{{ url_for('admin') }}" style="display: inline;">
             <input type="hidden" name="type" value="clearChat">
-            <input type="submit" value="Clear Chat">
+            <button type="submit" onclick="return confirm('Permanently clear all chat histories?');" style="background-color: #ffc107; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Clear Live Chatroom Logs</button>
         </form>
     </div>
 </body>

@@ -9,10 +9,41 @@
 <body>
     <h1>GACS Middle School Coding Club</h1>
     <h3>Leader: {{leader}}</h3>
+    
     {% if session.name %}
-        <h3>You: {{session.name}}</h3>
+        <h3>You: {{session.name}} (<a href="{{ url_for('change_password') }}" style="font-size: 14px;">Change Password</a>)</h3>
     {% endif %}
-    <p><a href="{{url_for('chat')}}">Chatroom</a><a>   </a><a href="{{url_for('rescources')}}">Rescources</a><a>   </a><a href="{{url_for('forum')}}">Help forum</a><form method="post" action="/logout"><input type="submit" value="Log Out"></form></p>
+
+    <!-- Clean Navigation Bar Row -->
+    <p>
+        <a href="{{url_for('chat')}}">Chatroom</a> &nbsp;&nbsp;&nbsp;
+        <a href="{{url_for('resources')}}">Resources</a> &nbsp;&nbsp;&nbsp;
+        <a href="{{url_for('forum')}}">Help forum</a> &nbsp;&nbsp;&nbsp;
+        
+        <!-- Smart Conditional Panel Links based on Login Session Role -->
+        {% if session.name %}
+            
+            <!-- If the logged-in user is an Admin (Rank 0), show both dashboards -->
+            {% if session.admin %}
+                <a href="{{url_for('admin')}}" style="font-weight: bold; color: gold;">Admin Panel</a> &nbsp;&nbsp;&nbsp;
+                <a href="{{url_for('curator')}}" style="font-weight: bold; color: lightblue;">Curator Panel</a> &nbsp;&nbsp;&nbsp;
+            
+            <!-- If they aren't admin, check if their rank matches Curator (Rank 1) -->
+            {% elif session.rank == 1 %}
+                <a href="{{url_for('curator')}}" style="font-weight: bold; color: lightblue;">Curator Panel</a> &nbsp;&nbsp;&nbsp;
+            {% endif %}
+
+            <!-- Always show Log Out if logged in -->
+            <form method="post" action="/logout" style="display: inline;">
+                <input type="submit" value="Log Out">
+            </form>
+
+        {% else %}
+            <!-- Show Log In link if they are a guest -->
+            <a href="{{url_for('login')}}">Log In</a>
+        {% endif %}
+    </p>
+
     {% if error %}
         <p style="color: red">{{error}}</p>
     {% endif %}
@@ -21,18 +52,24 @@
         <div class="box">
             <h2><em>Roster</em></h2>
 
-            {% for name in roster[0] %}
-               <p>{{name}}</p>
+            <h3 style="margin-bottom: 5px;">Admins</h3>
+            {% for name, info in roster.items() if info.rank == 0 %}
+               <p style="margin: 2px 0;">{{name}}</p>
             {% endfor %}
             <br>
-            {% for name in roster[1] %}
-               <p>{{name}}</p>
+            
+            <h3 style="margin-bottom: 5px;">Curators</h3>
+            {% for name, info in roster.items() if info.rank == 1 %}
+               <p style="margin: 2px 0;">{{name}}</p>
             {% endfor %}
             <br>
-            {% for name in roster[2] %}
-               <p>{{name}}</p>
+            
+            <h3 style="margin-bottom: 5px;">Students</h3>
+            {% for name, info in roster.items() if info.rank == 2 %}
+               <p style="margin: 2px 0;">{{name}}</p>
             {% endfor %}
         </div>
+        
         <div class="box">
             <h2><em>Bulletin Board</em></h2>
             {% for item in bulliten %}
@@ -43,6 +80,7 @@
             {% endfor %}
         </div>
     </div>
+    
     <div id="thatone">
         <div class="box" style="margin-top: 30px;">
             <h3>Last meet's topic: Data and Concat.</h3>

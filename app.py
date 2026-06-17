@@ -1,33 +1,63 @@
 from flask import Flask, render_template, url_for, request, redirect, session
-app = Flask(__name__)
 from better_profanity import profanity
 import json
 from date import cleanDate, year, day, month, is_after_school_hours as isAfterSchool
 
+app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = True
+app.secret_key = 'catbean'
 
-
-
+# --- Helper Functions for Data Storing ---
 def load(file):
-   with open("./data/" + file + '.json', 'r') as f:
-       return json.load(f)
+    with open("./data/" + file + '.json', 'r') as f:
+        return json.load(f)
 
 def save(data, file) -> None:
-   with open("./data/" + file + '.json', 'w') as f:
-       json.dump(data, f, indent=4)
+    with open("./data/" + file + '.json', 'w') as f:
+        json.dump(data, f, indent=4)
 
+# --- Real-Time Chat Feed endpoint ---
 @app.route("/getChatData")
 def getChatData():
     return load("chat")
 
-siteData = load("site")
-rosterData = load("roster")
-bullitenData = load("bulliten")
-postsData: list = load('posts')
+# --- Chatroom Interface Page ---
+# --- Chatroom Interface Page ---
+@app.route("/chat", methods=["GET", "POST"])
+def chat():
+    if "name" not in session:
+        return redirect(url_for("login", error="Please log in to use the chatroom."))
+        
+    if request.method == "POST":
+        content = request.form.get("content")
+        
+        # Pull clean date string and sanitize bad words
+        date_str = cleanDate() + " " + str(day) + " " + str(month)
+        content = profanity.censor(content)
+        
+        # Load, append new item, and save
+        chat_data = load("chat")
+        chat_data.append({
+            "author": session.get("name"),
+            "date": date_str,
+            "content": content
+        })
+        save(chat_data, "chat")
+        return "Success", 200 # Tell JavaScript the save worked
+        
+    return render_template("chat.html")
 
-app.secret_key = 'catbean'
 
+# --- Resources Directory Page ---
+@app.route("/resources")
+def resources():
+    try:
+        resources_data = load("resc")
+    except:
+        resources_data = []  # Fallback if file is empty or missing
+    return render_template("resc.html", resc=resources_data)
 
+# --- Homepage Route ---
 @app.route("/")
 def homepage():
     siteData = load("site")
@@ -36,226 +66,230 @@ def homepage():
     error = request.args.get("error")
     return render_template("index.html", error=error, roster=rosterData, bulliten=bullitenData, leader=siteData['leader'])
 
+# --- Authentication Handling (Login / Logout) ---
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
+    
+    if request.method == "POST":
+        name = request.form.get('username')
+        key = request.form.get('key')
+        rosterData = load("roster")
+        
+        if name in rosterData:
+            if key == rosterData[name]["password"]:
+                session['name'] = name
+                session['rank'] = rosterData[name]["rank"]
+                session['admin'] = True if rosterData[name]["rank"] == 0 else False
+                return redirect(url_for("homepage", error="Logged in!"))
+            return render_template("login.html", error="That's not the right key ):<")
+        else:
+            return render_template("login.html", error="....you're not in coding club? (you didn't put in the right name)")
+    return "Something went wrong"
+
 @app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     return redirect(url_for("homepage", error="Logged Out."))
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    siteData = load("site")
-    rosterData = load("roster")
-    bullitenData = load("bulliten")
-    postsData: list = load('posts')
+# --- Password Management ---
+@app.route("/change_password", methods=["GET", "POST"])
+def change_password():
+    if "name" not in session:
+        return redirect(url_for("login", error="Please log in first."))
+        
     if request.method == "GET":
-        return render_template("login.html")
+        return render_template("change_password.html")
+        
     if request.method == "POST":
-        name = request.form.get('username')
-        key = request.form.get('key')
-        if name in rosterData[0] or name in rosterData[1] or name in rosterData[2]:
-            if key == app.secret_key:
-                session['name'] = name
-                session['admin'] = False
-                session['rank'] = 2 if name in rosterData[2] else 1
-                if name in rosterData[0]:
-                    session['admin'] = True
-                return redirect(url_for("homepage", error="logged in!"))
-            return render_template("login.html", error="that's not the right key ):<")
-        else:
-            return render_template("login.html", error="....you're not in coding club? (you didn't put in the right name)")
-    return "uhh... beau messed up the coding"
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+        
+        rosterData = load("roster")
+        user = session["name"]
+        
+        if current_password != rosterData[user]["password"]:
+            return render_template("change_password.html", error="Current password is incorrect.")
+            
+        if new_password != confirm_password:
+            return render_template("change_password.html", error="New passwords do not match.")
+            
+        rosterData[user]["password"] = new_password
+        save(rosterData, "roster")
+        return redirect(url_for("homepage", error="Password changed successfully!"))
 
+# --- Dashboard Control Panels (Admin & Curator) ---
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-    siteData = load("site")
-    rosterData = load("roster")
-    bullitenData = load("bulliten")
-    postsData: list = load('posts')
-    if request.method == "GET":
-        if "name" not in session:
-            return redirect(url_for("homepage", error="Unauthorized."))
-        if session["admin"]:
-            return render_template("admin.html", roster=rosterData)
-        if session["name"] in rosterData[1]:
-            return render_template("curator.html", roster=rosterData)
+    if "name" not in session or not session.get("admin"):
         return redirect(url_for("homepage", error="Unauthorized."))
+        
+    rosterData = load("roster")
+    if request.method == "GET":
+        return render_template("admin.html", roster=rosterData)
+        
     if request.method == "POST":
-        if request.form.get('type') == "addUser":
+        form_type = request.form.get('type')
+        
+        if form_type == "addUser":
             name = request.form.get('name')
-            rank = request.form.get('rank')
-            d = load('roster')
-            d[int(rank)].append(name)
-            save(d, 'roster')
+            rank = int(request.form.get('rank'))
+            if name:
+                rosterData[name] = {"password": "catbean", "rank": rank}
+                save(rosterData, 'roster')
             return redirect(url_for("admin"))
-        if request.form.get('type') == "deleteUser":
+            
+        if form_type == "deleteUser":
             name = request.form.get('name')
-            rank = request.form.get('rank')
-            d:list = load('roster')
-            i = d[int(rank)].index(name)
-            del d[int(rank)][i]
-            save(d, 'roster')
+            if name in rosterData:
+                del rosterData[name]
+                save(rosterData, 'roster')
             return redirect(url_for("admin"))
-        if request.form.get('type') == "addResc":
+
+        if form_type == "editUser":
+            old_name = request.form.get('old_name')
+            new_name = request.form.get('new_name')
+            new_password = request.form.get('password')
+            new_rank = int(request.form.get('rank'))
+            
+            if old_name in rosterData:
+                # If the admin changed the username, update the dictionary key safely
+                if old_name != new_name and new_name:
+                    rosterData[new_name] = {"password": new_password, "rank": new_rank}
+                    del rosterData[old_name]
+                else:
+                    rosterData[old_name] = {"password": new_password, "rank": new_rank}
+                    
+                save(rosterData, 'roster')
+            return redirect(url_for("admin"))
+            
+        if form_type == "addResc":
             url = request.form.get('url')
             title = request.form.get('title')
-            rescou:list = load("resc")
-            rescou.append({
-                "url": url,
-                "title": title
-            })
+            rescou = load("resc")
+            rescou.append({"url": url, "title": title})
             save(rescou, "resc")
             return redirect(url_for("admin"))
-        if request.form.get('type') == "bulletinAdd":
+            
+        if form_type == "bulletinAdd":
             content = request.form.get('content')
             bullitenData = load("bulliten")
-            date = cleanDate() + " '" + str(year)[2:]
+            date_str = cleanDate() + " '" + str(year)[2:]
             bullitenData.insert(0, {
-                "date":date,
+                "date": date_str,
                 "author": session.get("name"),
                 "content": content
             })
-            save(bullitenData, "bulliten")
+            save(bullitenData, "bulletin")
             return redirect(url_for("admin"))
-        if request.form.get('type') == "clearChat":
+            
+        if form_type == "clearChat":
             save([], "chat")
             return redirect(url_for("admin"))
+
+
 @app.route("/curator", methods=["GET", "POST"])
 def curator():
-    siteData = load("site")
-    rosterData = load("roster")
-    bullitenData = load("bulliten")
-    postsData: list = load('posts')
-    if request.method == "GET":
-        if "name" not in session:
-            return redirect(url_for("homepage", error="Unauthorized."))
-        if session["admin"]:
-            return render_template("curator.html", roster=rosterData)
-        if session["name"] in rosterData[1]:
-            return render_template("curator.html", roster=rosterData)
+    if "name" not in session:
         return redirect(url_for("homepage", error="Unauthorized."))
+        
+    # Grant access if user is full admin (rank 0) or curator (rank 1)
+    if session.get("rank") not in[0, 1]:
+        return redirect(url_for("homepage", error="Unauthorized."))
+        
+    rosterData = load("roster")
+    if request.method == "GET":
+        return render_template("curator.html", roster=rosterData)
+        
     if request.method == "POST":
-        if request.form.get('type') == "addUser":
+        form_type = request.form.get('type')
+        
+        if form_type == "addUser":
             name = request.form.get('name')
-            rank = request.form.get('rank')
-            d = load('roster')
-            d[int(rank)].append(name)
-            save(d, 'roster')
+            rank = int(request.form.get('rank'))
+            rosterData[name] = {"password": "catbean", "rank": rank}
+            save(rosterData, 'roster')
             return redirect(url_for("curator"))
-        if request.form.get('type') == "deleteUser":
+            
+        if form_type == "deleteUser":
             name = request.form.get('name')
-            rank = request.form.get('rank')
-            d:list = load('roster')
-            i = d[int(rank)].index(name)
-            del d[int(rank)][i]
-            save(d, 'roster')
+            if name in rosterData:
+                del rosterData[name]
+                save(rosterData, 'roster')
             return redirect(url_for("curator"))
-        if request.form.get('type') == "addResc":
+            
+        if form_type == "addResc":
             url = request.form.get('url')
             title = request.form.get('title')
-            rescou:list = load("resc")
-            rescou.append({
-                "url": url,
-                "title": title
-            })
+            rescou = load("resc")
+            rescou.append({"url": url, "title": title})
             save(rescou, "resc")
             return redirect(url_for("curator"))
-        if request.form.get('type') == "bulletinAdd":
+            
+        if form_type == "bulletinAdd":
             content = request.form.get('content')
             bullitenData = load("bulliten")
-            date = cleanDate() + " '" + str(year)[2:]
+            date_str = cleanDate() + " '" + str(year)[2:]
             bullitenData.insert(0, {
-                "date":date,
+                "date": date_str,
                 "author": session.get("name"),
                 "content": content
             })
             save(bullitenData, "bulliten")
             return redirect(url_for("curator"))
-        if request.form.get('type') == "clearChat":
+            
+        if form_type == "clearChat":
             save([], "chat")
             return redirect(url_for("curator"))
 
+# --- Help Forum Thread Routing ---
 @app.route("/forum", methods=['GET', 'POST'])
 def forum():
     postsData = load("posts")
     if request.method == "GET":
-        postsData = load("posts")
         if "name" not in session:
-            return redirect("/login")
+            return redirect(url_for("login"))
         return render_template("forum.html", posts=postsData)
+        
     if request.method == "POST":
         fType = request.form.get('type')
         name = session["name"]
-        content = request.form.get('content')
-        date = cleanDate()
+        
         if fType == "deletePost":
             id = request.form.get('id')
             del postsData[int(id)]
             save(postsData, "posts")
             return redirect(url_for("forum"))
+            
         if fType == "newPost":
             content = request.form.get('content')
-            date = cleanDate() + " '" + str(year)[2:]
+            date_str = cleanDate() + " '" + str(year)[2:]
             content = profanity.censor(content)
             postsData.append({
                 "author": name,
-                "date": date,
+                "date": date_str,
                 "content": content,
-                "id": len(postsData),  # append to end so id matches index
+                "id": len(postsData),
                 "replies": []
             })
-
             save(postsData, "posts")
             return redirect(url_for("forum"))
+            
         if fType == "replyToPost":
             postId = request.form.get('postID')
             content = request.form.get('c')
-            date = cleanDate()
+            date_str = cleanDate()
             content = profanity.censor(content)
-            d = load('posts')
-            d[int(postId)]["replies"].append({
+            postsData[int(postId)]["replies"].append({
                 "author": name,
-                "date": date,
+                "date": date_str,
                 "content": content
             })
-            save(d, "posts")
+            save(postsData, "posts")
             return redirect(url_for("forum"))
 
-@app.route("/chat", methods=['GET', 'POST'])
-def chat():
-    if isAfterSchool():
-        postsData = load("chat")
-        if request.method == "GET":
-            postsData = load("chat")
-            if "name" not in session:
-                return redirect("/login")
-            return render_template("chat.html", posts=postsData)
-        if request.method == "POST":
-            fType = request.form.get('type')
-            name = session["name"]
-            content = request.form.get('content')
-            date = cleanDate()
-            if fType == "newPost":
-                content = request.form.get('content')
-                date = cleanDate()
-                content = profanity.censor(content)
-                postsData.append({
-                    "author": name,
-                    "date": str(month) + "/" + str(day),
-                    "content": content,
-                    "id": len(postsData)  # append to end so id matches index
-                })
-                save(postsData, "chat")
-                return ""  # instead of redirect
-
-    return "It's not after school! You can't access this page during school hours (8am-3pm)."
-
-@app.route("/rescources")
-def rescources():
-    res = load("resc")
-    return render_template("resc.html", resc=res)
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5000, host="0.0.0.0")
-
+# --- Main Application Bootstrapper ---
+if __name__ == "__main__":
+    app.run(debug=True)

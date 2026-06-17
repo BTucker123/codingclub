@@ -1,15 +1,30 @@
-[
-    [
-        "Beau Davidson"
-    ],
-    [
-        "Brandon Tucker"
-    ],
-    [
-        "Sami Hall",
-        "Brendan Clark",
-        "Micah Larson",
-        "Knox Bowling",
-        "Ethan Yang"
-    ]
-]
+{
+    "Beau": {
+        "password": "catbean",
+        "rank": 0
+    },
+    "Brandon": {
+        "password": "catbean",
+        "rank": 1
+    },
+    "Sami Hall": {
+        "password": "catbeab",
+        "rank": 2
+    },
+    "Ethan Yang": {
+        "password": "catbean",
+        "rank": 2
+    },
+    "Knox Bowling": {
+        "password": "catbean",
+        "rank": 2
+    },
+    "Brendan Clark": {
+        "password": "catbean",
+        "rank": 2
+    },
+    "Micah Larson": {
+        "password": "catbean",
+        "rank": 2
+    }
+}
